@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class="container">
+
+<div class="row">
+  <!-- Sidebar -->
+  <div class="col-md-3 sidebar">
+
+    <h3>Categories</h3>
+
+    <ul class="list-group">
+      {% for c in categories %}
+      <li class="list-group-item">
+        <span class="badge">x</span>
+        <a href="/items/{{ c.id }}">{{ c.name }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Items -->
+  <div class="col-md-9 items">
+      {% for i in items %}
+      <div class="item">
+        <img src="{{ i.image }}" alt="item-image" class="item-image img-responsive">
+        <div class="item-info">
+          <h3>{{ i.name }}</h3>
+          <p>by <strong>User Placeholder</strong> at <strong>22:39</strong></p>
+          <hr>
+          <a href="/item/{{ i.id }}" class="btn btn-info btn-small">see more</a>
+        </div>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+
+</div>
+
+{% endblock %}

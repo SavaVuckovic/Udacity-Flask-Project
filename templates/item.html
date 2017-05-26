@@ -1,0 +1,130 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="container">
+
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 sidebar">
+      <h3>Categories</h3>
+      <ul class="list-group">
+        {% for c in categories %}
+        <li class="list-group-item">
+          <span class="badge">x</span>
+          <a href="/items/{{ c.id }}">{{ c.name }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Item Information -->
+    <div class="col-md-9">
+
+      <div class="item-box">
+          <div class="row">
+            <div class="col-md-7">
+              <img src="{{ item.image }}" alt="item image" class="item-image">
+            </div>
+            <div class="col-md-5">
+              <h2>{{ item.name }}</h2>
+              <h5>owner{{ item.owner_id }} at 17:33</h5>
+              <hr>
+              <h5>Category: placeholder{{ item.category_id }}</h5>
+              <h5>Condition: {{ item.condition }}</h5>
+              <hr>
+              <h5>Location: placeholder</h5>
+              <h5>Phone: placeholder</h5>
+              <h5>Email: placeholder</h5>
+            </div>
+          </div>
+          <hr>
+          <div class="item-description">
+            {{ item.description }}
+            <hr>
+          </div>
+
+          <!-- Update or Delete the items if it belongs to the user -->
+          {% if allowed_to_edit %}
+          <div class="update-delete-item">
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#edit-modal">Edit</button>
+            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-modal">Delete</button>
+          </div>
+          <!-- Edit Modal -->
+          <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title">Edit the item</h4>
+                </div>
+                <div class="modal-body clearfix">
+                  <form action="" enctype='multipart/form-data' method="post">
+                    <div class="form-group">
+                      <input type="text" name="item_name" class="form-control", placeholder="Item Name">
+                    </div>
+
+                    <div class="form-group">
+                      <label for="image" class="btn btn-info btn-file">Upload Image</label>
+                      <input type="file" id="image" name="image" class="file-input"> <!-- Hidden file input field for uploading image -->
+                      <input type="text" id="file-name"  name="file-name" class="file-name">  <!-- Will send image name when form is submitted -->
+                      <p class="file-message"></p> <!--Will contain the name of the file once it's selected by the user-->
+                    </div>
+
+                    <div class="form-group">
+                      <select name="category_id" class="form-control">
+                        <option value="0">Choose Category</option>
+                        {% for c in categories %}
+                        <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <select name="condition" class="form-control" >
+                        <option selected="selected" value="0">Choose Condition</option>
+                        <option value="New">New</option>
+                        <option value="Used">Used</option>
+                        <option value="Bad">Bad</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="description">Description</label>
+                      <textarea name="description" class="form-control"></textarea>
+                    </div>
+
+                    <hr>
+                    <button type="submit" class="btn btn-info pull-right">Save changes</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Delete Modal -->
+          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                  ...
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

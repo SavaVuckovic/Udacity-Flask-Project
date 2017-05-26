@@ -1,0 +1,147 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+.btn-info {
+  background: #05668D;
+}
+
+.btn-info:hover {
+  background: #20BF55;
+  border: 1px solid #fff;
+}
+
+.navbar {
+  min-height: 65px;
+  background: #05668d;
+  z-index: 1000;
+}
+
+.navbar-default {
+  border-color: transparent;
+}
+
+.nav li a {
+  height: 65px;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 40px;
+  margin-left: 15px;
+  color: #fff!important;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+}
+
+.landing-page {
+  position: absolute;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 1200px;
+  background: url(../images/handshake.jpg);
+}
+
+.sidebar h3 {
+  padding: 10px;
+  border-radius: 3px;
+  background-color: #20bf55;
+  font-weight: bold;
+  color: #fff;
+}
+
+.items {
+  display: flex;
+  flex-wrap: wrap;
+  /* test
+  flex-direction: column;
+  min-height: 100vh;*/
+}
+
+.item {
+  border-radius: 5px;
+  width: 30%;
+  height: 400px;
+  max-height: 700px;
+  margin: 20px 10px 10px;
+  overflow: hidden;
+}
+
+.item-image {
+  height: 65%;
+  width: 100%;
+}
+
+.item-info {
+  padding: 10px;
+  font-size: 12px;
+}
+
+.item-info h3 {
+  padding: 0;
+  margin: 0 0 5px;
+}
+
+.item-info hr {
+  margin: 15px;
+}
+
+.item:hover {
+  box-shadow: 0 0 6px 0 #AEA79F;
+}
+
+.item-box {
+  width: 100%;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+.item-description {
+  padding: 10px;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+#image {
+  visibility: hidden;
+  display: inline;
+  color: transparent;
+}
+
+#file-name {
+  visibility: hidden;
+  display: inline;
+  color: transparent;
+}
+
+.file-message {
+  color: #05668d;
+  margin: 5px;
+}
+
+
+.post-item-form h2 {
+  color: #05668d;
+}
+
+.post-item-form textarea {
+  max-width: 100%;
+}
+/*
+.update-delete-item {
+  display: inline-block;
+  border: 1px dashed black;
+}
+.update-delete-item form {
+  display: inline-block;
+  border: 1px dashed black;
+}*/
