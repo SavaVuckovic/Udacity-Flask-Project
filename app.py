@@ -7,12 +7,12 @@ import helper_functions as helper
 
 '''
 TO DO:
- - fix auth
  - style images
  finish:
  - Update (& authorization)
  - Delete (& authorization)
- - create more helpers and show all required info
+
+ - created at (timestamp)
  - clean the code (final) (pep8)
  - create the home page
  - create JSON endpoint
@@ -79,15 +79,18 @@ def create_item():
         return render_template('create.html', categories = categories)
 
 #  View single item
-@app.route('/item/<int:item_id>')  ######11111111111111111111111111111111111111111111111
+@app.route('/item/<int:item_id>')
 def item(item_id):
     categories = helper.getAllCategories()
     item = helper.getItem(item_id)
+    item_category = helper.getCategory(item.category_id)
+    owner = helper.getItemOwner(item.owner_id)
     allowed_to_edit = False
     if 'username' in login_session:
         if item.owner_id == login_session['user_id']:
             allowed_to_edit = True
-    return render_template('item.html', item = item, categories = categories, allowed_to_edit = allowed_to_edit)
+    return render_template('item.html', categories = categories, item = item,
+        item_category = item_category, owner = owner, allowed_to_edit = allowed_to_edit)
 
 #  Login
 @app.route('/login')
@@ -137,7 +140,7 @@ def gconnect():
     gplus_id = credentials.id_token['sub']
     if result['user_id'] != gplus_id:
         response = make_response(
-            json.dumps("Token's user ID doesn't match given user ID."), 401)
+            json.dumps('Token\'s user ID doesn\'t match given user ID.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -161,26 +164,54 @@ def gconnect():
     login_session['gplus_id'] = gplus_id
 
     #  Get user info
-    userinfo_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+    userinfo_url = 'https://www.googleapis.com/oauth2/v2/userinfo'
     params = {'access_token': credentials.access_token, 'alt': 'json'}
     answer = requests.get(userinfo_url, params=params)
 
     data = answer.json()
-
     #  Update the session with user info
-    login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
-    #  Create user if he doesn't already exist in the database
-    user_id = helper.getUserID(data["email"])
+    #  If user doesn't exist in the database, send different response
+    try:
+        user_id = helper.getUserID(data['email'])
+    except Exception as e:
+        print(e)
+    try:
+        user_info = helper.getUserInfo(user_id)
+    except Exception as e:
+        print(e)
     if not user_id:
-        user_id = helper.createUser(login_session)
-    login_session['user_id'] = user_id
+        return 'User doesn\'t exist'
+    else:
+        login_session['user_id'] = user_id
+        login_session['username'] = user_info.name
+        flash('Successfully logged in as %s' % user_info.name, 'success')
+        return 'User exists'
 
-    #  Success
-    flash("Successfully logged in as %s" % login_session['username'], 'success')
-    return login_session['username']
+#  Create the User in database table users
+@app.route('/register_user', methods=['POST'])
+def register_user():
+    #  CSRF protection
+    if request.args.get('state') != login_session['state']:
+        response = make_response(json.dumps('Something went wrong.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    #  Update the session
+    login_session['username'] = request.form['username']
+    #  Create the user in the database
+    user = helper.createUser(
+        login_session,
+        request.form['phone'],
+        request.form['location'])
+    login_session['user_id'] = user.id
+    #  If user created successfully
+    if user:
+        flash('Successfully logged in as %s' % user.name, 'success')
+        return 'success'
+    else:
+        return 'failed'
 
 
 #  Disconnect (Log out) the user
@@ -213,7 +244,6 @@ def disconnect():
         del login_session['email']
         del login_session['picture']
         del login_session['user_id']
-        del login_session['provider']
         return redirect('/items')
     else:
         flash("You were not logged in")

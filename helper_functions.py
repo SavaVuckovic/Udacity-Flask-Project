@@ -21,21 +21,27 @@ def createItem(user_id, category_id, item_name, condition, description, img_name
     session.commit()
     return item
 
-def createUser(login_session):
+def createUser(login_session, phone, location):
     #  create new user object
     user = User(
         name=login_session['username'],
         email=login_session['email'],
-        picture=login_session['picture'])
+        picture=login_session['picture'],
+        phone=phone,
+        location=location)
     #  Add new user to the database
     session.add(user)
     session.commit()
     user = session.query(User).filter_by(email=login_session['email']).one()
-    return user.id
+    return user
 
 def getUserInfo(user_id):
     user = session.query(User).filter_by(id=user_id).one()
     return user
+
+def getItemOwner(item_owner_id):
+    owner = session.query(User).filter_by(id=item_owner_id).one()
+    return owner
 
 def getUserID(email):
     try:
@@ -66,3 +72,4 @@ def getAllCategories():
 
 def getCategory(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
+    return category

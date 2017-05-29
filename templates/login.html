@@ -2,13 +2,13 @@
 
 {% block body %}
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
-</script>
-
+<!-- scripts required for login to work -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="//apis.google.com/js/platform.js?onload=start"> </script>
 
 <div class="container" style="text-align: center;">
 
+  <!-- Google sign in button -->
   <div id="signInButton">
   <span class="g-signin"
     data-scope="openid email"
@@ -21,7 +21,26 @@
   </span>
   </div>
 
+  <!-- message to the user -->
   <div id="result-msg"></div>
+  <!-- additional info that user will need in order to register his accound -->
+  <div id="additional-info" style='display: none;'>
+    <div class="alert alert-info">
+      Your account is almost ready, please fill the form in order to complete registration
+    </div>
+    <form method='post' id='additional-info-form'>
+      <div class="form-group">
+        <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+      </div>
+      <div class="form-group">
+        <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" required>
+      </div>
+      <div class="form-group">
+        <input type="text" class="form-control" id="location" name="location" placeholder="Enter your location" required>
+      </div>
+      <button type="submit" class="btn btn-info">Register</button>
+    </form>
+  </div>
 
 </div>
 
@@ -39,14 +58,18 @@ function signInCallback(authResult) {
       data: authResult['code'],
       contentType: 'application/octet-stream; charset=utf-8',
       success: function(result) {
-        console.log(result); ///////////
-        // Handle or verify the server response if necessary.
+        //  Handle the server response
         if (result) {
-          $('#result-msg').html('<div class="alert alert-success">Successful Login as '+ result + '</div>')
-         setTimeout(function() {
-          window.location.href = "/items";
-          }, 1000);
-        //  Error
+          //  If user is registered (already exists in the database), redirect him to /items page
+          if(result == 'User exists'){
+            $('#result-msg').html('<div class="alert alert-success">Redirecting...</div>')
+            setTimeout(function() {
+              window.location.href = "/items";
+            }, 1000);
+          //  If user is not registered, show him the form to add more info about himself
+          } else {
+            $('#additional-info').show(200);
+          }
         } else if (authResult['error']) {
           console.log('There was an error: ' + authResult['error']);
         } else {
@@ -55,6 +78,34 @@ function signInCallback(authResult) {
       }});
   }
 }
+</script>
+<!-- When the form is submitted, send ajax call to /register_user route -->
+<script>
+$('#additional-info-form').submit(function(e){
+  e.preventDefault();
+  var postdata = $(this).serializeArray();
+  $.ajax({
+    url: '/register_user?state={{state}}',
+    type: 'POST',
+    data: postdata,
+    success: function(result){
+      if(result){
+        //  Registration is successful, redirect to /items
+        if(result == 'success'){
+          $('#result-msg').html('<div class="alert alert-success">Registration successful!</div>')
+          setTimeout(function() {
+            window.location.href = "/items";
+          }, 1000);
+        // Registration not successful
+        } else {
+          $('#result-msg').html('Something went wrong, please try again later.');
+        }
+      } else {
+        $('#result-msg').html('Something went wrong, please try again later.');
+      }
+    }
+  })
+})
 </script>
 
 {% endblock %}

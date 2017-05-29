@@ -21,8 +21,8 @@ class User(Base):
     name = Column(String(250), nullable = False)
     email = Column(String(250), nullable = False)
     picture = Column(String(250))
-    phone = Column(Integer)
-    location = Column(String(250))
+    phone = Column(Integer, nullable = False)
+    location = Column(String(250), nullable = False)
 
 #  Items(for trade) table
 class Item(Base):

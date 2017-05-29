@@ -136,12 +136,3 @@ body {
 .post-item-form textarea {
   max-width: 100%;
 }
-/*
-.update-delete-item {
-  display: inline-block;
-  border: 1px dashed black;
-}
-.update-delete-item form {
-  display: inline-block;
-  border: 1px dashed black;
-}*/

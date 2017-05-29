@@ -27,14 +27,14 @@
             </div>
             <div class="col-md-5">
               <h2>{{ item.name }}</h2>
-              <h5>owner{{ item.owner_id }} at 17:33</h5>
+              <h5>{{ owner.name }} at 17:33</h5>
               <hr>
-              <h5>Category: placeholder{{ item.category_id }}</h5>
+              <h5>Category: {{ item_category.name }}</h5>
               <h5>Condition: {{ item.condition }}</h5>
               <hr>
-              <h5>Location: placeholder</h5>
-              <h5>Phone: placeholder</h5>
-              <h5>Email: placeholder</h5>
+              <h5>Location: {{ owner.location }}</h5>
+              <h5>Phone: {{ owner.phone }}</h5>
+              <h5>Email: {{ owner.email }}</h5>
             </div>
           </div>
           <hr>
