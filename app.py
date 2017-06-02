@@ -1,48 +1,56 @@
-from flask import Flask, render_template, flash, redirect, url_for, request, jsonify, make_response
 from flask import session as login_session
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
+from flask import Flask, render_template, flash, redirect, url_for, request, jsonify, make_response
+from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 import os, random, string, httplib2, json, requests
 import helper_functions as helper
 
 '''
 TO DO:
- - style images
- finish:
- - Update (& authorization)
- - Delete (& authorization)
-
- - created at (timestamp)
  - clean the code (final) (pep8)
- - create the home page
+
  - create JSON endpoint
- - change Google API project name
  - write a readme
 
 '''
 
 
 app = Flask(__name__)
-CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(
+    open('client_secrets.json', 'r').read())['web']['client_id']
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-#  Home page
+#  Home page, all items
 @app.route('/')
 def index():
-    return render_template('home.html')
-
-#  All items
-@app.route('/items')
-def items():
     categories = helper.getAllCategories()
     items_for_trade = helper.getAllItems()
-    return render_template('items.html', items = items_for_trade, categories = categories)
+    item_owner_ids = []
+    item_owners = []
+    for item in items_for_trade:
+        item_owner_ids.append(item.owner_id)
+    for id in item_owner_ids:
+        item_owners.append(helper.getItemOwner(id))
+    #  Convert into set to remove duplicate values
+    item_owners = set(item_owners)
 
+    return render_template('items.html', items = items_for_trade,
+                                owners = item_owners, categories = categories)
+
+#  Items by category
 @app.route('/items/<int:category_id>/')
 def items_by_category(category_id):
     categories = helper.getAllCategories()
     items = helper.getItemsByCategory(category_id)
-    return render_template('items.html', items = items, categories = categories)
+    item_owner_ids = []
+    item_owners = []
+    for item in items:
+        item_owner_ids.append(item.owner_id)
+    for id in item_owner_ids:
+        item_owners.append(helper.getItemOwner(id))
+    #  Convert into set to remove duplicate values
+    item_owners = set(item_owners)
+    return render_template('items.html', items = items,
+                                owners = item_owners, categories = categories)
 
 #  Create new item
 @app.route('/create/', methods=['GET', 'POST'] )
@@ -57,11 +65,16 @@ def create_item():
         target = os.path.join(APP_ROOT, 'static/images/')
         image = request.files['image']
         imgpath = request.form['file-name']
-        #  Extract only image name
+        #  Extract only image name and save it
         imgname = imgpath.split('\\')
         imgname = imgname[::-1][0]
+        #  Check if user has uploaded the image, if not, set the default
+        if imgname == '':
+            imgname = 'noimage.jpg'
+        #  Save the image if the user has uploaded it
         destination = os.path.join(target, imgname)
-        image.save(destination)
+        if imgname != 'noimage.jpg':
+            image.save(destination)
         #  Add item to the database
         newItem = helper.createItem(
             login_session['user_id'],
@@ -72,7 +85,7 @@ def create_item():
             '/static/images/'+imgname)
         #  Display success message and redirect
         flash("{item} is now available for trade.".format(item = newItem.name), 'success')
-        return redirect('/items')
+        return redirect('/')
     #  If user simply visits the page
     else:
         categories = helper.getAllCategories()
@@ -89,8 +102,62 @@ def item(item_id):
     if 'username' in login_session:
         if item.owner_id == login_session['user_id']:
             allowed_to_edit = True
+    state = 'not logged in'
+    if 'state' in login_session:
+        state = login_session['state']
     return render_template('item.html', categories = categories, item = item,
-        item_category = item_category, owner = owner, allowed_to_edit = allowed_to_edit)
+        item_category = item_category, owner = owner,
+        state = state, allowed_to_edit = allowed_to_edit)
+
+#  Update item
+@app.route('/update', methods=['POST'])
+def update():
+    #  CSRF protection
+    if request.args.get('state') != login_session['state']:
+        response = make_response(json.dumps('Something went wrong.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    item_id = request.form['update-item-id']
+    #  Dictionary of data to update
+    new_data = {};
+    for d in request.form:
+        new_data[d] = request.form[d]
+
+    #  Upload the item image
+    target = os.path.join(APP_ROOT, 'static/images/')
+    image = request.files['image']
+    imgpath = request.form['file-name']
+    #  Extract only image name and save it
+    imgname = imgpath.split('\\')
+    imgname = imgname[::-1][0]
+    #  Check if user has uploaded the image, if not, set the default
+    if imgname == '':
+        imgname = 'noimage.jpg'
+    #  Save the image if the user has uploaded it
+    destination = os.path.join(target, imgname)
+    if imgname != 'noimage.jpg':
+        image.save(destination)
+    #  Call the helper to update item
+    helper.updateItem(item_id, new_data, imgname)
+    flash('Item edited successfully', 'success')
+    return item_id
+
+
+#  Delete item
+@app.route('/delete', methods=['POST'])
+def delete():
+    #  CSRF protection
+    if request.args.get('state') != login_session['state']:
+        response = make_response(json.dumps('Something went wrong.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    item_id = request.form['delete-item-id']
+    #  Delete the item
+    helper.deleteItem(item_id)
+    #  Call the helper to update item
+    flash('Item deleted successfully', 'success')
+    return 'deleted'
+
 
 #  Login
 @app.route('/login')
@@ -225,7 +292,6 @@ def disconnect():
             response.headers['Content-Type'] = 'application/json'
             return response
         access_token = token
-        print('token: ' + access_token)
         url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
         h = httplib2.Http()
         result = h.request(url, 'GET')[0]
@@ -244,51 +310,13 @@ def disconnect():
         del login_session['email']
         del login_session['picture']
         del login_session['user_id']
-        return redirect('/items')
+        return redirect('/')
     else:
         flash("You were not logged in")
-        return redirect('/items')
+        return redirect('/')
 
 
 if __name__ == '__main__':
     app.secret_key = "this_is_fun_76543"
     app.run(debug=True)
     #app.run()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''
-
-
-RELEVANT
-https://github.com/udacity/OAuth2.0
-https://www.google.rs/search?q=flask+and+3rd+party+oauth&ie=utf-8&oe=utf-8&client=firefox-b&gws_rd=cr&ei=cBUgWbKWOcfXwAL3rJOwCw
-https://blog.miguelgrinberg.com/post/oauth-authentication-with-flask
-http://docs.sqlalchemy.org/en/latest/orm/basic_relationships.html#one-to-many
-
-
-
-
-
-
-
-
-
-'''

@@ -60,11 +60,11 @@ function signInCallback(authResult) {
       success: function(result) {
         //  Handle the server response
         if (result) {
-          //  If user is registered (already exists in the database), redirect him to /items page
+          //  If user is registered (already exists in the database), redirect him to home page
           if(result == 'User exists'){
             $('#result-msg').html('<div class="alert alert-success">Redirecting...</div>')
             setTimeout(function() {
-              window.location.href = "/items";
+              window.location.href = "/";
             }, 1000);
           //  If user is not registered, show him the form to add more info about himself
           } else {
@@ -90,11 +90,11 @@ $('#additional-info-form').submit(function(e){
     data: postdata,
     success: function(result){
       if(result){
-        //  Registration is successful, redirect to /items
+        //  Registration is successful, redirect to home
         if(result == 'success'){
           $('#result-msg').html('<div class="alert alert-success">Registration successful!</div>')
           setTimeout(function() {
-            window.location.href = "/items";
+            window.location.href = "/";
           }, 1000);
         // Registration not successful
         } else {

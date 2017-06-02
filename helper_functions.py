@@ -73,3 +73,35 @@ def getAllCategories():
 def getCategory(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
     return category
+
+
+
+def updateItem(item_id, new_data, imgname):
+    item_to_edit = getItem(item_id)
+
+    item_to_edit.name = new_data['item_name']
+    item_to_edit.description = new_data['description']
+    item_to_edit.condition = new_data['condition']
+    item_to_edit.category_id = new_data['category_id']
+    item_to_edit.image = '/static/images/'+imgname
+
+    session.add(item_to_edit)
+    session.commit()
+
+def deleteItem(item_id):
+    item_to_delete = getItem(item_id)
+    session.delete(item_to_delete)
+    session.commit()
+
+
+
+
+
+
+
+
+
+
+
+
+# sasasa

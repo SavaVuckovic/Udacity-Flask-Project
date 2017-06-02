@@ -10,7 +10,6 @@
       <ul class="list-group">
         {% for c in categories %}
         <li class="list-group-item">
-          <span class="badge">x</span>
           <a href="/items/{{ c.id }}">{{ c.name }}</a>
         </li>
         {% endfor %}
@@ -23,11 +22,11 @@
       <div class="item-box">
           <div class="row">
             <div class="col-md-7">
-              <img src="{{ item.image }}" alt="item image" class="item-image">
+              <img src="{{ item.image }}" alt="item image" class="item-image img-responsive">
             </div>
             <div class="col-md-5">
               <h2>{{ item.name }}</h2>
-              <h5>{{ owner.name }} at 17:33</h5>
+              <h5>{{ owner.name }}</h5>
               <hr>
               <h5>Category: {{ item_category.name }}</h5>
               <h5>Condition: {{ item.condition }}</h5>
@@ -54,13 +53,15 @@
             <div class="modal-dialog" role="document">
               <div class="modal-content">
                 <div class="modal-header">
+                  <div id="result-msg"></div>
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                   <h4 class="modal-title">Edit the item</h4>
                 </div>
                 <div class="modal-body clearfix">
-                  <form action="" enctype='multipart/form-data' method="post">
+
+                  <form id="update-item-form" enctype='multipart/form-data' method="post">
                     <div class="form-group">
-                      <input type="text" name="item_name" class="form-control", placeholder="Item Name">
+                      <input type="text" name="item_name" class="form-control" value="{{ item.name }}">
                     </div>
 
                     <div class="form-group">
@@ -72,7 +73,7 @@
 
                     <div class="form-group">
                       <select name="category_id" class="form-control">
-                        <option value="0">Choose Category</option>
+                        <option value="{{ item_category.id }}">{{ item_category.name }}</option>
                         {% for c in categories %}
                         <option value="{{ c.id }}">{{ c.name }}</option>
                         {% endfor %}
@@ -81,7 +82,7 @@
 
                     <div class="form-group">
                       <select name="condition" class="form-control" >
-                        <option selected="selected" value="0">Choose Condition</option>
+                        <option selected="selected" value="{{ item.condition }}">{{ item.condition }}</option>
                         <option value="New">New</option>
                         <option value="Used">Used</option>
                         <option value="Bad">Bad</option>
@@ -90,8 +91,11 @@
 
                     <div class="form-group">
                       <label for="description">Description</label>
-                      <textarea name="description" class="form-control"></textarea>
+                      <textarea name="description" class="form-control">{{ item.description }}</textarea>
                     </div>
+
+                    <!-- Hidden input to send item id -->
+                    <input type="hidden" name="update-item-id" value="{{ item.id }}">
 
                     <hr>
                     <button type="submit" class="btn btn-info pull-right">Save changes</button>
@@ -100,24 +104,91 @@
               </div>
             </div>
           </div>
+
+
           <!-- Delete Modal -->
-          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" >
             <div class="modal-dialog" role="document">
               <div class="modal-content">
                 <div class="modal-header">
+                  <div id="delete-msg"></div>
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                  <h4 class="modal-title">Are you sure you want to delete this item?</h4>
                 </div>
                 <div class="modal-body">
-                  ...
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary">Save changes</button>
+                  <div class="row">
+                    <div class="col-xs-6">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                    <div class="col-xs-6">
+                      <form id="delete-item-form" method="post">
+                        <!-- Hidden input to send item id -->
+                        <input type="hidden" name="delete-item-id" value="{{ item.id }}">
+                        <!-- Confirm the deletion -->
+                        <button type="submit" class="btn btn-danger pull-right">Yes</button>
+                      </form>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- Ajax calls -->
+          <script>
+          //  Ajax call to /update when update form is submitted
+          $('#update-item-form').submit(function(e){
+            e.preventDefault();
+            var postdata = new FormData(this);
+            $.ajax({
+              url: '/update?state={{state}}',
+              type: 'POST',
+              data: postdata,
+              processData: false,
+              contentType: false,
+              cache: false,
+              success: function(result){
+                if(result){
+                  //  Updating successful, redirect to that item
+                  if(typeof(result) == 'string'){
+                    window.location.href = '/item/' + result;
+                  // Registration not successful
+                  } else {
+                    $('#result-msg').html('Something went wrong, please try again later.');
+                  }
+                } else {
+                  $('#result-msg').html('Something went wrong, please try again later.');
+                }
+              }
+            })
+
+          });
+
+          //  Ajax call to /delete when delete form is submitted
+          $('#delete-item-form').submit(function(e){
+            e.preventDefault();
+            var postdata = $(this).serializeArray();
+            $.ajax({
+              url: '/delete?state={{state}}',
+              type: 'POST',
+              data: postdata,
+              success: function(result){
+                if(result){
+                  //  Deleting successful
+                  if(result == 'deleted'){
+                    window.location.href = '/';
+                  //  Not successful
+                  } else {
+                    $('#delete-msg').html('Something went wrong, please try again later.');
+                  }
+                } else {
+                  $('#delete-msg').html('Something went wrong, please try again later.');
+                }
+              }
+            })
+
+          });
+          </script>
 
           {% endif %}
       </div>

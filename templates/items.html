@@ -13,7 +13,6 @@
     <ul class="list-group">
       {% for c in categories %}
       <li class="list-group-item">
-        <span class="badge">x</span>
         <a href="/items/{{ c.id }}">{{ c.name }}</a>
       </li>
       {% endfor %}
@@ -27,7 +26,13 @@
         <img src="{{ i.image }}" alt="item-image" class="item-image img-responsive">
         <div class="item-info">
           <h3>{{ i.name }}</h3>
-          <p>by <strong>User Placeholder</strong> at <strong>22:39</strong></p>
+          <p>by <strong>
+            {% for o in owners %}
+              {% if o.id == i.owner_id %}
+                {{ o.name }}
+              {% endif %}
+            {% endfor %}
+          </strong></p>
           <hr>
           <a href="/item/{{ i.id }}" class="btn btn-info btn-small">see more</a>
         </div>
