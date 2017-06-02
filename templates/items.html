@@ -26,13 +26,14 @@
         <img src="{{ i.image }}" alt="item-image" class="item-image img-responsive">
         <div class="item-info">
           <h3>{{ i.name }}</h3>
-          <p>by <strong>
+          <p>by
+            <strong>
             {% for o in owners %}
               {% if o.id == i.owner_id %}
                 {{ o.name }}
               {% endif %}
             {% endfor %}
-          </strong></p>
+            </strong></p>
           <hr>
           <a href="/item/{{ i.id }}" class="btn btn-info btn-small">see more</a>
         </div>

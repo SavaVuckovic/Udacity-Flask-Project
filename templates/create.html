@@ -11,10 +11,12 @@
       <hr>
       <form action="#" enctype='multipart/form-data' method="post">
 
+        <!-- Item name -->
         <div class="form-group">
           <input type="text" name="item_name" class="form-control", placeholder="Item Name">
         </div>
 
+        <!-- Item image -->
         <div class="form-group">
           <label for="image" class="btn btn-info btn-file">Upload Image</label>
           <input type="file" id="image" name="image" class="file-input"> <!-- Hidden file input field for uploading image -->
@@ -22,6 +24,7 @@
           <p class="file-message"></p> <!--Will contain the name of the file once it's selected by the user-->
         </div>
 
+        <!-- Item category -->
         <div class="form-group">
           <select name="category_id" class="form-control">
             <option value="0">Choose Category</option>
@@ -31,6 +34,7 @@
           </select>
         </div>
 
+        <!-- Item condition -->
         <div class="form-group">
           <select name="condition" class="form-control" >
             <option selected="selected" value="0">Choose Condition</option>
@@ -40,16 +44,18 @@
           </select>
         </div>
 
+        <!-- Item description -->
         <div class="form-group">
           <label for="description">Description</label>
           <textarea name="description" class="form-control"></textarea>
         </div>
 
+        <!-- Submit -->
         <div class="form-group">
           <input type="submit" class="btn btn-info"  value="Post">
         </div>
 
-      </form> 
+      </form>
       <hr>
 
     </div>

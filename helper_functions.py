@@ -8,18 +8,20 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+
 def createItem(user_id, category_id, item_name, condition, description, img_name):
     item = Item(
-        owner_id = user_id,
-        category_id = category_id,
-        name = item_name,
-        condition = condition,
-        description = description,
-        image = img_name
+        owner_id=user_id,
+        category_id=category_id,
+        name=item_name,
+        condition=condition,
+        description=description,
+        image=img_name
     )
     session.add(item)
     session.commit()
     return item
+
 
 def createUser(login_session, phone, location):
     #  create new user object
@@ -35,13 +37,16 @@ def createUser(login_session, phone, location):
     user = session.query(User).filter_by(email=login_session['email']).one()
     return user
 
+
 def getUserInfo(user_id):
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
+
 def getItemOwner(item_owner_id):
     owner = session.query(User).filter_by(id=item_owner_id).one()
     return owner
+
 
 def getUserID(email):
     try:
@@ -50,30 +55,31 @@ def getUserID(email):
     except:
         return None
 
+
 def getItem(item_id):
     item = session.query(Item).filter_by(id=item_id).one()
     return item
+
 
 def getAllItems():
     items = session.query(Item).order_by(desc(Item.id))
     return items
 
+
 def getItemsByCategory(category_id):
-    items = session.query(Item).filter_by(category_id=category_id).order_by(desc(Item.id)).all()
+    items = session.query(Item).filter_by(
+        category_id=category_id).order_by(desc(Item.id)).all()
     return items
-
-
-
 
 
 def getAllCategories():
     categories = session.query(Category)
     return categories
 
+
 def getCategory(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
     return category
-
 
 
 def updateItem(item_id, new_data, imgname):
@@ -83,25 +89,13 @@ def updateItem(item_id, new_data, imgname):
     item_to_edit.description = new_data['description']
     item_to_edit.condition = new_data['condition']
     item_to_edit.category_id = new_data['category_id']
-    item_to_edit.image = '/static/images/'+imgname
+    item_to_edit.image = '/static/images/' + imgname
 
     session.add(item_to_edit)
     session.commit()
+
 
 def deleteItem(item_id):
     item_to_delete = getItem(item_id)
     session.delete(item_to_delete)
     session.commit()
-
-
-
-
-
-
-
-
-
-
-
-
-# sasasa

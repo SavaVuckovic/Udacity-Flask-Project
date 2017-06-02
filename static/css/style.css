@@ -59,9 +59,6 @@ body {
 .items {
   display: flex;
   flex-wrap: wrap;
-  /* test
-  flex-direction: column;
-  min-height: 100vh;*/
 }
 
 .item {

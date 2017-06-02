@@ -1,7 +1,12 @@
 from flask import session as login_session
 from flask import Flask, render_template, flash, redirect, url_for, request, jsonify, make_response
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
-import os, random, string, httplib2, json, requests
+import os
+import random
+import string
+import httplib2
+import json
+import requests
 import helper_functions as helper
 
 '''
@@ -20,6 +25,8 @@ CLIENT_ID = json.loads(
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 #  Home page, all items
+
+
 @app.route('/')
 def index():
     categories = helper.getAllCategories()
@@ -33,10 +40,12 @@ def index():
     #  Convert into set to remove duplicate values
     item_owners = set(item_owners)
 
-    return render_template('items.html', items = items_for_trade,
-                                owners = item_owners, categories = categories)
+    return render_template('items.html', items=items_for_trade,
+                           owners=item_owners, categories=categories)
 
 #  Items by category
+
+
 @app.route('/items/<int:category_id>/')
 def items_by_category(category_id):
     categories = helper.getAllCategories()
@@ -49,11 +58,13 @@ def items_by_category(category_id):
         item_owners.append(helper.getItemOwner(id))
     #  Convert into set to remove duplicate values
     item_owners = set(item_owners)
-    return render_template('items.html', items = items,
-                                owners = item_owners, categories = categories)
+    return render_template('items.html', items=items,
+                           owners=item_owners, categories=categories)
 
 #  Create new item
-@app.route('/create/', methods=['GET', 'POST'] )
+
+
+@app.route('/create/', methods=['GET', 'POST'])
 def create_item():
     #  Redirect if user is not logged in
     if 'username' not in login_session:
@@ -82,16 +93,19 @@ def create_item():
             request.form['item_name'],
             request.form['condition'],
             request.form['description'],
-            '/static/images/'+imgname)
+            '/static/images/' + imgname)
         #  Display success message and redirect
-        flash("{item} is now available for trade.".format(item = newItem.name), 'success')
+        flash("{item} is now available for trade.".format(
+            item=newItem.name), 'success')
         return redirect('/')
     #  If user simply visits the page
     else:
         categories = helper.getAllCategories()
-        return render_template('create.html', categories = categories)
+        return render_template('create.html', categories=categories)
 
 #  View single item
+
+
 @app.route('/item/<int:item_id>')
 def item(item_id):
     categories = helper.getAllCategories()
@@ -105,11 +119,13 @@ def item(item_id):
     state = 'not logged in'
     if 'state' in login_session:
         state = login_session['state']
-    return render_template('item.html', categories = categories, item = item,
-        item_category = item_category, owner = owner,
-        state = state, allowed_to_edit = allowed_to_edit)
+    return render_template('item.html', categories=categories, item=item,
+                           item_category=item_category, owner=owner,
+                           state=state, allowed_to_edit=allowed_to_edit)
 
 #  Update item
+
+
 @app.route('/update', methods=['POST'])
 def update():
     #  CSRF protection
@@ -119,7 +135,7 @@ def update():
         return response
     item_id = request.form['update-item-id']
     #  Dictionary of data to update
-    new_data = {};
+    new_data = {}
     for d in request.form:
         new_data[d] = request.form[d]
 
@@ -169,7 +185,9 @@ def login():
     return render_template('login.html', state=state)
 
 #  Auth with Google
-@app.route('/gconnect', methods = ['POST'])
+
+
+@app.route('/gconnect', methods=['POST'])
 def gconnect():
     #  CSRF protection
     if request.args.get('state') != login_session['state']:
@@ -186,19 +204,20 @@ def gconnect():
     #  If it fails
     except FlowExchangeError:
         response = make_response(
-                    json.dumps('Failed to create credentials object'), 401)
+            json.dumps('Failed to create credentials object'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     #  Verify the token
     access_token = credentials.access_token
-    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % access_token)
+    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' %
+           access_token)
     h = httplib2.Http()
     #  JSON object has to be str, not bytes
     result = json.loads(h.request(url, 'GET')[1].decode('utf-8'))
 
     #  Check if token is valid
     if result.get('error') is not None:
-        print("Error: " + result.get('error')) #
+        print("Error: " + result.get('error'))
         response = make_response(json.dumps(result.get('error')), 500)
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -222,7 +241,7 @@ def gconnect():
     stored_gplus_id = login_session.get('gplus_id')
     if stored_credentials is not None and gplus_id == stored_gplus_id:
         response = make_response(
-            json.dumps('Already connected'),200)
+            json.dumps('Already connected'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -258,6 +277,8 @@ def gconnect():
         return 'User exists'
 
 #  Create the User in database table users
+
+
 @app.route('/register_user', methods=['POST'])
 def register_user():
     #  CSRF protection
