@@ -15,6 +15,13 @@ It is recommended to download and install Python 3, because this program is writ
 Following additional Python packages are also required:
 - flask
 - sqlalchemy
+- requests
+- oauth2client
+
+These can be installed from the command line using pip
+##### example:
+
+`pip install flask`
 
 ## Usage
 
@@ -23,7 +30,7 @@ Instructions on how to start the application on localhost:5000 of your local mac
 #### UNIX users
 In terminal run a command:
 
-`$ sudo python app.py`
+`sudo python app.py`
 
 #### Windows Users
-The webpage will be opened by simply double clicking the *app.py* file.
+The application will be started by simply double clicking the *app.py* file.
