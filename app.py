@@ -47,7 +47,6 @@ def indexJSON():
 
     return jsonify(jsonObj)
 
-
 #  Home page, all items
 
 
