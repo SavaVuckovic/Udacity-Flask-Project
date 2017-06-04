@@ -11,11 +11,7 @@ import helper_functions as helper
 
 '''
 TO DO:
- - clean the code (final) (pep8)
-
- - create JSON endpoint
  - write a readme
-
 '''
 
 
@@ -23,6 +19,34 @@ app = Flask(__name__)
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+#  JSON Endpoint
+
+
+@app.route('/JSON')
+def indexJSON():
+    categories = helper.getAllCategories()
+    items = helper.getAllItems()
+    #  Create the object that will be jsonified, and fill it with required info
+    jsonObj = {'Category': []}
+    for cat in categories:
+        jsonObj['Category'].append({
+            'id': cat.id,
+            'name': cat.name,
+            'trade_items': []
+        })
+    for i in items:
+        jsonObj['Category'][i.category_id-1]['trade_items'].append({
+            'id': i.id,
+            'owner_id': i.owner_id,
+            'category_id': i.category_id,
+            'name': i.name,
+            'condition': i.condition,
+            'description': i.description
+        })
+
+    return jsonify(jsonObj)
+
 
 #  Home page, all items
 
