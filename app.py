@@ -9,12 +9,6 @@ import json
 import requests
 import helper_functions as helper
 
-'''
-TO DO:
- - write a readme
-'''
-
-
 app = Flask(__name__)
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
@@ -362,5 +356,5 @@ def disconnect():
 
 if __name__ == '__main__':
     app.secret_key = "this_is_fun_76543"
-    app.run(debug=True)
-    #app.run()
+    #app.run(debug=True)
+    app.run()
